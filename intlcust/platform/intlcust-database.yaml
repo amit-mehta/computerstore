@@ -1,0 +1,22 @@
+---
+# domcust-database configuration for persistent storage
+Type: "aws/rds-mysql"
+Stage: "01-database"
+Persist: true
+IngressPoint: true
+
+
+Configuration:
+  DomcustDatabase:
+    Type: "AWS::RDS::DBInstance"
+    Security:
+      # Allow access by component 'paxpet'
+      - Source: "domcust.AsgSecurityGroup"
+        Allow: "TCP:3306"
+    Properties:
+      AllocatedStorage: 100
+      DBInstanceClass: db.m3.medium
+      DBName: "intlcustdb"
+      MasterUsername: root
+      MasterUserPassword: "IntlCustQF2017"
+      DeletionPolicy: Snapshot

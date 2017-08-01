@@ -1,0 +1,74 @@
+---
+Type: "aws/autoscale"
+Stage: "02-intlcust"
+IngressPoint: true
+Persist: false
+Configuration:
+  IntlcustCore:
+    Type: "AWS::EC2::Instance"
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          commands:
+            01-install:
+              command: '/bin/bash -x /root/payload/install.sh'
+              cwd: '/'
+    Properties:
+      ImageId: "@rhel7-latest"
+      InstanceType: "t2.small"
+  IntlcustElb:
+    Type: "AWS::ElasticLoadBalancing::LoadBalancer"
+    Properties:
+      Listeners:
+        - LoadBalancerPort: "8080"
+          InstancePort: "8080"
+          Protocol: "HTTP"
+      HealthCheck:
+        HealthyThreshold: "2"
+        Interval: "300"
+        Target: "HTTP:8080/health"
+        Timeout: "60"
+        UnhealthyThreshold: "2"
+  AutoScalingGroup:
+    Type: "AWS::AutoScaling::AutoScalingGroup"
+    Properties:
+      MinSize: 1
+      MaxSize: 2
+      HealthCheckGracePeriod: 300
+  ScaleUpPolicy:
+    Type: "AWS::AutoScaling::ScalingPolicy"
+    Properties:
+      AdjustmentType: "ChangeInCapacity"
+      Adjustment: 1
+      Cooldown: 300
+  ScaleDownPolicy:
+    Type: "AWS::AutoScaling::ScalingPolicy"
+    Properties:
+      AdjustmentType: "ChangeInCapacity"
+      Adjustment: -1
+      Cooldown: 60
+  AlarmHighCpu:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      AlarmActions: "ScaleUpPolicy"
+      ComparisonOperator: "GreaterThanThreshold"
+      EvaluationPeriods: 2
+      MetricName: "CPUUtilization"
+      Period: 60
+      Statistic: "Average"
+      Threshold: 75
+  AlarmLowCpu:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      AlarmActions: "ScaleDownPolicy"
+      ComparisonOperator: "LessThanThreshold"
+      EvaluationPeriods: 4
+      MetricName: "CPUUtilization"
+      Period: 60
+      Statistic: "Average"
+      Threshold: 35
+  
+  LaunchConfiguration:
+    Type: "AWS::AutoScaling::LaunchConfiguration"
+    Properties:
+      InstanceType: "t2.small"

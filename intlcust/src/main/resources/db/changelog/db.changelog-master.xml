@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!-- schemas -->
+    <changeSet id="agent_31072017" author="amitmehta">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="agent"/>
+            </not>
+        </preConditions>
+        <createTable tableName="agent">
+            <column name="iata_code" type="varchar(15)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_code" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="customer_31072017" author="amitmehta">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="international_customer_summary"/>
+            </not>
+        </preConditions>
+        <createTable tableName="international_customer_summary">
+            <column name="customer_code" type="varchar(7)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_number" type="varchar(15)"/>
+            <column name="customer_name" type="varchar(100)"/>
+            <column name="shop_number" type="varchar(50)"/>
+            <column name="street_number" type="varchar(50)"/>
+            <column name="street_name" type="varchar(50)"/>
+            <column name="street_type" type="varchar(20)"/>
+            <column name="city" type="varchar(15)"/>
+            <column name="state" type="varchar(10)"/>
+            <column name="post_code" type="varchar(10)"/>
+            <column name="country_code" type="varchar(5)"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
